@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna 3D con Fases</title>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; }
+        canvas { display: block; }
+        input { margin-top: 20px; width: 300px; }
+    </style>
+</head>
+<body>
+    <div id="lienzo"></div>
+    <input type="range" id="porcentaje" min="0" max="100" value="0">
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script>
+        const escena = new THREE.Scene();
+        const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderizador = new THREE.WebGLRenderer({ antialias: true });
+        renderizador.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('lienzo').appendChild(renderizador.domElement);
+
+        // Crear la luna
+        const geometria = new THREE.SphereGeometry(1, 64, 64);
+        const texturaLuna = new THREE.TextureLoader().load('./moonmap4k.jpg');
+        const material = new THREE.MeshStandardMaterial({ map: texturaLuna });
+        const luna = new THREE.Mesh(geometria, material);
+        escena.add(luna);
+
+        // Luz para simular el sol
+        const luz = new THREE.PointLight(0xffffff, 1);
+        luz.position.set(5, 0, 5);
+        escena.add(luz);
+
+        camara.position.z = 2;
+
+        function animar() {
+            requestAnimationFrame(animar);
+            luna.rotation.y += 0.002;
+            renderizador.render(escena, camara);
+        }
+
+        // Ajustar la fase lunar moviendo la luz
+        document.getElementById('porcentaje').addEventListener('input', (evento) => {
+            const porcentaje = evento.target.value / 100;
+            const angulo = porcentaje * Math.PI * 2;
+            luz.position.x = 5 * Math.cos(angulo);
+            luz.position.z = 5 * Math.sin(angulo);
+        });
+
+        animar();
+    </script>
+</body>
+</html>
